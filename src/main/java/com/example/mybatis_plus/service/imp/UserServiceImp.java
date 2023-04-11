@@ -2,7 +2,7 @@ package com.example.mybatis_plus.service.imp;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.mybatis_plus.bean.User;
-import com.example.mybatis_plus.mapper.UserMapper;
+import com.example.mybatis_plus.dao.UserMapper;
 import com.example.mybatis_plus.service.UserService;
 import org.springframework.stereotype.Service;
 

@@ -2,8 +2,10 @@ package com.example.mybatis_plus.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.mybatis_plus.bean.User;
-import com.example.mybatis_plus.mapper.UserMapper;
+import com.example.mybatis_plus.dao.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
@@ -23,13 +25,15 @@ import java.util.List;
 public class UserServiceTest {
     @Autowired
     private UserMapper userMapper;
+
     @Test
-    public void test1(){
+    public void test1() {
         List<User> users = userMapper.selectList(null);
         users.stream().forEach(System.out::println);
     }
+
     @Test
-    public void insert1(){
+    public void insert1() {
         User user = new User();
         user.setName("向东");
         user.setAge(25);
@@ -39,18 +43,20 @@ public class UserServiceTest {
         int rows = userMapper.insert(user);
         System.out.println(rows);
     }
+
     @Test
-    public void update1(){
+    public void update1() {
         User user = new User();
         user.setId(1088248166370832384L);
         user.setEmail("zhangsan@163.com");
         userMapper.updateById(user);
         userMapper.selectList(null).stream().forEach(System.out::println);
     }
+
     @Test
-    public void select1(){
+    public void select1() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.like("name","三");
+        userQueryWrapper.like("name", "三");
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -58,15 +64,16 @@ public class UserServiceTest {
      * 多条件查询
      */
     @Test
-    public void select2(){
+    public void select2() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.like("name","%雨%").lt("age",40);
+        userQueryWrapper.like("name", "%雨%").lt("age", 40);
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
+
     @Test
-    public void select3(){
+    public void select3() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.like("name","%雨%").between("age",20,40).isNotNull("email");
+        userQueryWrapper.like("name", "%雨%").between("age", 20, 40).isNotNull("email");
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -74,9 +81,9 @@ public class UserServiceTest {
      * 多字段排序
      */
     @Test
-    public void select4(){
+    public void select4() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.like("name","王%").or().ge("age",25).orderByDesc("age").orderByAsc("id");
+        userQueryWrapper.like("name", "王%").or().ge("age", 25).orderByDesc("age").orderByAsc("id");
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -84,22 +91,24 @@ public class UserServiceTest {
      * 日期作为查询条件
      */
     @Test
-    public void select5(){
+    public void select5() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.apply("date_format(create_time,'%Y-%m-%d')={0}","2019-02-14")
-                .inSql("manager_id","select id from tbl_user where name like '王%'");
+        userQueryWrapper.apply("date_format(create_time,'%Y-%m-%d')={0}", "2019-02-14")
+                .inSql("manager_id", "select id from tbl_user where name like '王%'");
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
+
     @Test
-    public void select6(){
+    public void select6() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.likeRight("name","王").and(qw -> qw.lt("age",40).or().isNotNull("email"));
+        userQueryWrapper.likeRight("name", "王").and(qw -> qw.lt("age", 40).or().isNotNull("email"));
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
+
     @Test
-    public void select7(){
+    public void select7() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.likeRight("name","王").or(qw -> qw.lt("age",40).gt("age",20).isNotNull("email"));
+        userQueryWrapper.likeRight("name", "王").or(qw -> qw.lt("age", 40).gt("age", 20).isNotNull("email"));
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -107,9 +116,9 @@ public class UserServiceTest {
      * 先查符合括号中条件的用户
      */
     @Test
-    public void select8(){
+    public void select8() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.nested(qw -> qw.lt("age",40).or().isNotNull("email")).likeRight("name","王");
+        userQueryWrapper.nested(qw -> qw.lt("age", 40).or().isNotNull("email")).likeRight("name", "王");
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -117,9 +126,9 @@ public class UserServiceTest {
      * 查年龄在指定区间的
      */
     @Test
-    public void select9(){
+    public void select9() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.in("age", Arrays.array(30,31,34,35));
+        userQueryWrapper.in("age", Arrays.array(30, 31, 34, 35));
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -127,7 +136,7 @@ public class UserServiceTest {
      * 只显示一条数据，该方法有sql注入的风险
      */
     @Test
-    public void select10(){
+    public void select10() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         userQueryWrapper.last("limit 1");
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
@@ -137,9 +146,9 @@ public class UserServiceTest {
      * 只查询需要的字段
      */
     @Test
-    public void select11(){
+    public void select11() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.select("id","name").like("name","雨").lt("age",40);
+        userQueryWrapper.select("id", "name").like("name", "雨").lt("age", 40);
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -147,9 +156,9 @@ public class UserServiceTest {
      * 排除不需要的字段
      */
     @Test
-    public void select12(){
+    public void select12() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.select(User.class,qw -> !qw.getColumn().equals("create_time")&&!qw.getColumn().equals("email")).like("name","雨").lt("age",40);
+        userQueryWrapper.select(User.class, qw -> !qw.getColumn().equals("create_time") && !qw.getColumn().equals("email")).like("name", "雨").lt("age", 40);
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -157,9 +166,9 @@ public class UserServiceTest {
      * 使用condition
      */
     @Test
-    public void select13(){
+    public void select13() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.select(User.class,qw -> !qw.getColumn().equals("create_time")&&!qw.getColumn().equals("email")).like("name","雨").lt("age",40);
+        userQueryWrapper.select(User.class, qw -> !qw.getColumn().equals("create_time") && !qw.getColumn().equals("email")).like("name", "雨").lt("age", 40);
         userMapper.selectList(userQueryWrapper).stream().forEach(System.out::println);
     }
 
@@ -168,7 +177,7 @@ public class UserServiceTest {
      * 查询条件默认是等于，可在实体类对应字段上添加条件
      */
     @Test
-    public void select14(){
+    public void select14() {
         User user = new User();
         user.setName("雨");
         user.setAge(35);
@@ -180,31 +189,50 @@ public class UserServiceTest {
      * allEq
      */
     @Test
-    public void select15(){
+    public void select15() {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         HashMap<String, Object> map1 = new HashMap<>();
         HashMap<String, Object> map2 = new HashMap<>();
-        map1.put("name","张三");
-        map1.put("age",null);
-        map2.put("name","张三");
-        map2.put("age",20);
-        map2.put("email","xxxxx");
+        map1.put("name", "张三");
+        map1.put("age", null);
+        map2.put("name", "张三");
+        map2.put("age", 20);
+        map2.put("email", "xxxxx");
         //map2.put("create_time","2023-04-11");
-        userQueryWrapper.allEq((k,v) -> !k.equals("email") && v != null,map2);
+        userQueryWrapper.allEq((k, v) -> !k.equals("email") && v != null, map2);
         userMapper.selectList(userQueryWrapper).forEach(System.out::println);
     }
+
     /**
      * 使用lambda表达式构建QueryWrapper
      * 优点是防止字段名写错
      */
     @Test
-    public void lambdaSelect(){
+    public void lambdaSelect() {
         //lambdaQueryWrapper三种创建方式
         //LambdaQueryWrapper<User> lambda = new QueryWrapper<User>().lambda();
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         //LambdaQueryWrapper<User> lambdaQuery = Wrappers.lambdaQuery();
 
-        lambdaQueryWrapper.select(User::getId,User::getName,User::getAge).lt(User::getAge,35);
+        lambdaQueryWrapper.select(User::getId, User::getName, User::getAge).lt(User::getAge, 35);
         userMapper.selectMaps(lambdaQueryWrapper).forEach(System.out::println);
+    }
+
+    /**
+     * 分页查询,页下表从1开始，小于1则默认从1开始
+     */
+    @Test
+    public void pageSelect() {
+        Page<User> userPage = new Page<>(1, 5);
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        //userQueryWrapper.lt("age",35);
+        userQueryWrapper.select("id", "name", "age", "email").le("age", 25);
+        //Page<Map<String, Object>> iPage = userMapper.<Page>selectMapsPage(userPage, userQueryWrapper);
+        IPage<User> iPage = userMapper.selectUserPage(userPage, userQueryWrapper);
+        iPage.getRecords().forEach(System.out::println);
+        System.out.println("当前页数:" + iPage.getCurrent());
+        System.out.println("总页数：" + iPage.getPages());
+        System.out.println("总记录数：" + iPage.getTotal());
+
     }
 }
