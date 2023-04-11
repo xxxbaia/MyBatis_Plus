@@ -9,3 +9,7 @@ logging:
   level:
     root:
     com.example.mybatis_plus.dao: trace
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_uuid

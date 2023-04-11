@@ -2,7 +2,9 @@ package com.example.mybatis_plus.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.mybatis_plus.bean.User;
 import com.example.mybatis_plus.dao.UserMapper;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -35,11 +38,11 @@ public class UserServiceTest {
     @Test
     public void insert1() {
         User user = new User();
-        user.setName("向东");
-        user.setAge(25);
+        user.setName("张三");
+        user.setAge(23);
         user.setCreateTime(LocalDateTime.now().toString());
-        user.setEmail("xiangdong@163.com");
-        user.setId(1088248166370833567L);
+        user.setEmail("zhangsan@163.com");
+        user.setId(1088248166370836813L);
         int rows = userMapper.insert(user);
         System.out.println(rows);
     }
@@ -163,7 +166,7 @@ public class UserServiceTest {
     }
 
     /**
-     * 使用condition
+     * 使用condition类的操作，进行拼接
      */
     @Test
     public void select13() {
@@ -204,6 +207,17 @@ public class UserServiceTest {
     }
 
     /**
+     * SelectOne方法的返回值只能有一条记录否则报错
+     */
+    @Test
+    public void select16(){
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("name","三");
+        User user = userMapper.selectOne(queryWrapper);
+        System.out.println(user);
+    }
+
+    /**
      * 使用lambda表达式构建QueryWrapper
      * 优点是防止字段名写错
      */
@@ -234,5 +248,97 @@ public class UserServiceTest {
         System.out.println("总页数：" + iPage.getPages());
         System.out.println("总记录数：" + iPage.getTotal());
 
+    }
+
+    /**
+     * 通过对象实体更新
+     */
+    @Test
+    public void updateById(){
+        User user = new User();
+        user.setId(1088248166370836813L);
+        user.setAge(28);
+        int rows = userMapper.updateById(user);
+        System.out.println(rows);
+    }
+    /**
+     * 通过Wrapper设置过滤条件，将User实体的内容更新到数据库中
+     */
+    @Test
+    public void updateByWrapperAndUser(){
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("name","张三");
+        User user = new User();
+        user.setEmail("zhangsanNew@163.com");
+        int rows = userMapper.update(user, updateWrapper);
+        System.out.println(rows);
+    }
+
+    /**
+     * 通过Wrapper设置过滤条件并设置修改内容
+     */
+    @Test
+    public void updateByWrapper(){
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("name","向北").set("manager_id",1088248166370838984L);
+        int rows = userMapper.update(null, updateWrapper);
+        System.out.println(rows);
+    }
+    /**
+     * 通过ChainWrapper直接完成过滤和修改操作，并返回是否成功。需要传入mapper对象
+     */
+    @Test
+    public void updateByWrapperChain(){
+        boolean update = new LambdaUpdateChainWrapper<User>(userMapper).eq(User::getName, "向西").set(User::getManagerId, 1088248166370838984L).update();
+        System.out.println(update);
+    }
+    @Test
+    public void deleteById(){
+        int rows = userMapper.deleteById(11111);
+        System.out.println(rows);
+    }
+    @Test
+    public void deleteByMap(){
+        HashMap<String, Object> delCondition= new HashMap<>();
+        delCondition.put("name","张三");
+        int rows = userMapper.deleteByMap(delCondition);
+        System.out.println(rows);
+    }
+
+    /**
+     * AR模式，直接操作对象进行crud操作
+     * 条件：
+     *  1.bean去继承Model类
+     *  2.在bean上添加@EqualAndHashCode(callSuper=false)
+     *  3.bean中配置序列化相关参数：private static final long serialVersionUID = 1L
+     *  4.原始mapper接口继承BaseMapper
+     */
+    @Test
+    public void crudByAR(){
+        User user = new User();
+        user.setId(1088248166370832145L);
+        user.setName("AR模式");
+        user.setAge(99);
+        user.setEmail("AR@163.com");
+        user.setCreateTime(LocalDate.now().toString());
+        boolean insert = user.insert();
+        System.out.println(insert);
+
+        User user1 = new User();
+        user1.setId(1088248166370832145L);
+        User user2 = user1.selectById();
+        System.out.println(user2);
+
+        User user3 = new User();
+        user3.setId(1088248166370832145L);
+        User user4 = user3.selectById(1088248166370832385L);
+        System.out.println(user3 == user4);
+        System.out.println(user4);
+
+        User user5 = new User();
+        user5.setId(1088248166370832145L);
+        user5.setEmail("ARNewEmail@163.com");
+        boolean result = user5.updateById();
+        System.out.println(result);
     }
 }
